@@ -27,7 +27,7 @@ settings_data = '''
 [make-flags]
 src=/home/sjg/c/src
 chroot=/home/sjg/c/chroot
-vboot=USE_STDINT=1 VBOOT_DEBUG=1 MAKEFLAGS_VBOOT=DEBUG=1 CFLAGS_EXTRA_VBOOT=-DUNROLL_LOOPS VBOOT_SOURCE=${src}/platform/vboot_reference
+vboot=VBOOT_DEBUG=1 MAKEFLAGS_VBOOT=DEBUG=1 CFLAGS_EXTRA_VBOOT=-DUNROLL_LOOPS VBOOT_SOURCE=${src}/platform/vboot_reference
 chromeos_coreboot=VBOOT=${chroot}/build/link/usr ${vboot}
 chromeos_daisy=VBOOT=${chroot}/build/daisy/usr ${vboot}
 chromeos_peach=VBOOT=${chroot}/build/peach_pit/usr ${vboot}
@@ -327,6 +327,9 @@ class TestFunctional(unittest.TestCase):
     def _HandleCommandObjdump(self, args):
         return command.CommandResult(return_code=0)
 
+    def _HandleCommandObjcopy(self, args):
+        return command.CommandResult(return_code=0)
+
     def _HandleCommandSize(self, args):
         return command.CommandResult(return_code=0)
 
@@ -359,6 +362,8 @@ class TestFunctional(unittest.TestCase):
             return self._HandleCommandNm(args)
         elif cmd.endswith('objdump'):
             return self._HandleCommandObjdump(args)
+        elif cmd.endswith('objcopy'):
+            return self._HandleCommandObjcopy(args)
         elif cmd.endswith( 'size'):
             return self._HandleCommandSize(args)
 

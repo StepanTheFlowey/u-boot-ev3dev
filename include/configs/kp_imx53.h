@@ -21,7 +21,6 @@
 #define CONFIG_SYS_FSL_ESDHC_NUM	1
 
 /* Eth Configs */
-#define CONFIG_MII
 
 /* USB Configs */
 #define CONFIG_USB_EHCI_MX5
@@ -46,6 +45,7 @@
 	"fdt_high=0xffffffff\0"		\
 	"scriptaddr=0x74000000\0"	\
 	"kernel_file=fitImage\0"\
+	"silent=1\0"\
 	"rdinit=/sbin/init\0" \
 	"addinitrd=setenv bootargs ${bootargs} rdinit=${rdinit} ${debug} \0" \
 	"upd_image=st.4k\0" \
@@ -87,7 +87,6 @@
 #define CONFIG_SYS_LOAD_ADDR		CONFIG_LOADADDR
 
 /* Physical Memory Map */
-#define CONFIG_NR_DRAM_BANKS	1
 #define PHYS_SDRAM_1			CSD0_BASE_ADDR
 #define PHYS_SDRAM_1_SIZE		(512 * SZ_1M)
 #define PHYS_SDRAM_SIZE		(PHYS_SDRAM_1_SIZE)

@@ -29,6 +29,7 @@ struct spl_image_info {
 #if CONFIG_IS_ENABLED(LOAD_FIT)
 	void *fdt_addr;
 #endif
+	u32 boot_device;
 	u32 size;
 	u32 flags;
 	void *arg;
@@ -59,7 +60,7 @@ struct spl_load_info {
  * image is found. For * example if u-boot.img is used we don't check that
  * spl_parse_image_header() can parse a valid header.
  */
-binman_sym_extern(ulong, u_boot_any, pos);
+binman_sym_extern(ulong, u_boot_any, image_pos);
 
 /**
  * spl_load_simple_fit() - Loads a fit image from a device.
@@ -288,6 +289,19 @@ int spl_mmc_load_image(struct spl_image_info *spl_image,
 void spl_invoke_atf(struct spl_image_info *spl_image);
 
 /**
+ * spl_optee_entry - entry function for optee
+ *
+ * args defind in op-tee project
+ * https://github.com/OP-TEE/optee_os/
+ * core/arch/arm/kernel/generic_entry_a32.S
+ * @arg0: pagestore
+ * @arg1: (ARMv7 standard bootarg #1)
+ * @arg2: device tree address, (ARMv7 standard bootarg #2)
+ * @arg3: non-secure entry address (ARMv7 bootarg #0)
+ */
+void spl_optee_entry(void *arg0, void *arg1, void *arg2, void *arg3);
+
+/**
  * board_return_to_bootrom - allow for boards to continue with the boot ROM
  *
  * If a board (e.g. the Rockchip RK3368 boards) provide some
@@ -296,4 +310,19 @@ void spl_invoke_atf(struct spl_image_info *spl_image);
  * can implement 'board_return_to_bootrom'.
  */
 void board_return_to_bootrom(void);
+
+/**
+ * spl_perform_fixups() - arch/board-specific callback before processing
+ *                        the boot-payload
+ */
+void spl_perform_fixups(struct spl_image_info *spl_image);
+
+/*
+ * spl_get_load_buffer() - get buffer for loading partial image data
+ *
+ * Returns memory area which can be populated by partial image data,
+ * ie. uImage or fitImage header.
+ */
+struct image_header *spl_get_load_buffer(ssize_t offset, size_t size);
+
 #endif

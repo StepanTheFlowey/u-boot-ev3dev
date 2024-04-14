@@ -19,7 +19,12 @@ obj-$(CONFIG_ARCH_AT91) += at91/
 obj-$(CONFIG_OPTEE) += optee/
 
 obj-$(CONFIG_AES) += aes.o
+
+ifndef API_BUILD
+ifneq ($(CONFIG_UT_UNICODE)$(CONFIG_EFI_LOADER),)
 obj-y += charset.o
+endif
+endif
 obj-$(CONFIG_USB_TTY) += circbuf.o
 obj-y += crc7.o
 obj-y += crc8.o
@@ -29,6 +34,7 @@ obj-$(CONFIG_FIT) += fdtdec_common.o
 obj-$(CONFIG_TEST_FDTDEC) += fdtdec_test.o
 obj-$(CONFIG_GZIP_COMPRESSED) += gzip.o
 obj-$(CONFIG_GENERATE_SMBIOS_TABLE) += smbios.o
+obj-$(CONFIG_IMAGE_SPARSE) += image-sparse.o
 obj-y += initcall.o
 obj-$(CONFIG_LMB) += lmb.o
 obj-y += ldiv.o
@@ -39,10 +45,16 @@ obj-$(CONFIG_PHYSMEM) += physmem.o
 obj-y += qsort.o
 obj-y += rc4.o
 obj-$(CONFIG_SUPPORT_EMMC_RPMB) += sha256.o
-obj-$(CONFIG_TPM) += tpm.o
 obj-$(CONFIG_RBTREE)	+= rbtree.o
 obj-$(CONFIG_BITREVERSE) += bitrev.o
 obj-y += list_sort.o
+endif
+
+obj-$(CONFIG_$(SPL_TPL_)TPM) += tpm-common.o
+ifeq ($(CONFIG_$(SPL_TPL_)TPM),y)
+obj-y += crc8.o
+obj-$(CONFIG_TPM_V1) += tpm-v1.o
+obj-$(CONFIG_TPM_V2) += tpm-v2.o
 endif
 
 obj-$(CONFIG_RSA) += rsa/
@@ -53,6 +65,7 @@ obj-$(CONFIG_$(SPL_)ZLIB) += zlib/
 obj-$(CONFIG_$(SPL_)GZIP) += gunzip.o
 obj-$(CONFIG_$(SPL_)LZO) += lzo/
 
+obj-$(CONFIG_LIBAVB) += libavb/
 
 obj-$(CONFIG_$(SPL_TPL_)SAVEENV) += qsort.o
 obj-$(CONFIG_$(SPL_TPL_)OF_LIBFDT) += libfdt/
@@ -83,6 +96,7 @@ obj-$(CONFIG_REGEX) += slre.o
 obj-y += string.o
 obj-y += tables_csum.o
 obj-y += time.o
+obj-y += hexdump.o
 obj-$(CONFIG_TRACE) += trace.o
 obj-$(CONFIG_LIB_UUID) += uuid.o
 obj-$(CONFIG_LIB_RAND) += rand.o

@@ -99,6 +99,10 @@
 #define BOOTEFI_NAME "bootia32.efi"
 #elif defined(CONFIG_X86_RUN_64BIT)
 #define BOOTEFI_NAME "bootx64.efi"
+#elif defined(CONFIG_CPU_RISCV_32)
+#define BOOTEFI_NAME "bootriscv32.efi"
+#elif defined(CONFIG_CPU_RISCV_64)
+#define BOOTEFI_NAME "bootriscv64.efi"
 #endif
 #endif
 
@@ -240,16 +244,27 @@
 
 #if defined(CONFIG_CMD_DHCP)
 #if defined(CONFIG_EFI_LOADER)
-#if defined(CONFIG_ARM64)
+/* http://www.iana.org/assignments/dhcpv6-parameters/dhcpv6-parameters.xml */
+#if defined(CONFIG_ARM64) || defined(__aarch64__)
 #define BOOTENV_EFI_PXE_ARCH "0xb"
 #define BOOTENV_EFI_PXE_VCI "PXEClient:Arch:00011:UNDI:003000"
-#elif defined(CONFIG_ARM)
+#elif defined(CONFIG_ARM) || defined(__arm__)
 #define BOOTENV_EFI_PXE_ARCH "0xa"
 #define BOOTENV_EFI_PXE_VCI "PXEClient:Arch:00010:UNDI:003000"
-#elif defined(CONFIG_X86)
-/* Always assume we're running 64bit */
+#elif defined(CONFIG_X86) || defined(__x86_64__)
 #define BOOTENV_EFI_PXE_ARCH "0x7"
 #define BOOTENV_EFI_PXE_VCI "PXEClient:Arch:00007:UNDI:003000"
+#elif defined(__i386__)
+#define BOOTENV_EFI_PXE_ARCH "0x6"
+#define BOOTENV_EFI_PXE_VCI "PXEClient:Arch:00006:UNDI:003000"
+#elif defined(CONFIG_CPU_RISCV_32) || ((defined(__riscv) && __riscv_xlen == 32))
+#define BOOTENV_EFI_PXE_ARCH "0x19"
+#define BOOTENV_EFI_PXE_VCI "PXEClient:Arch:00025:UNDI:003000"
+#elif defined(CONFIG_CPU_RISCV_64) || ((defined(__riscv) && __riscv_xlen == 64))
+#define BOOTENV_EFI_PXE_ARCH "0x1b"
+#define BOOTENV_EFI_PXE_VCI "PXEClient:Arch:00027:UNDI:003000"
+#elif defined(CONFIG_SANDBOX)
+# error "sandbox EFI support is only supported on ARM and x86"
 #else
 #error Please specify an EFI client identifier
 #endif

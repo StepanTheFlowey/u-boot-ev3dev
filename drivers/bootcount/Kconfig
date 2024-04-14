@@ -72,6 +72,14 @@ config BOOTCOUNT_AT91
 
 endchoice
 
+config BOOTCOUNT_BOOTLIMIT
+	int "Maximum number of reboot cycles allowed"
+	default 0
+	help
+	  Set the Maximum number of reboot cycles allowed without the boot
+	  counter being cleared.
+	  If set to 0 do not set a boot limit in the environment.
+
 config BOOTCOUNT_ALEN
 	int "I2C address length"
 	default 1
@@ -118,5 +126,11 @@ config SYS_BOOTCOUNT_ADDR
 		   BOOTCOUNT_I2C
 	help
 	  Set the address used for reading and writing the boot counter.
+
+config SYS_BOOTCOUNT_MAGIC
+	hex "Magic value for the boot counter"
+	default 0xB001C041
+	help
+	  Set the magic value used for the boot counter.
 
 endif

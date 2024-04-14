@@ -25,7 +25,6 @@ int cpu_eth_init(bd_t *bis);
 
 /* Driver initialization prototypes */
 int at91emac_register(bd_t *bis, unsigned long iobase);
-int au1x00_enet_initialize(bd_t*);
 int ax88180_initialize(bd_t *bis);
 int bcm_sf2_eth_register(bd_t *bis, u8 dev_num);
 int bfin_EMAC_initialize(bd_t *bis);
@@ -69,7 +68,6 @@ int sh_eth_initialize(bd_t *bis);
 int skge_initialize(bd_t *bis);
 int smc91111_initialize(u8 dev_num, int base_addr);
 int smc911x_initialize(u8 dev_num, int base_addr);
-int tsi108_eth_initialize(bd_t *bis);
 int uec_standard_init(bd_t *bis);
 int uli526x_initialize(bd_t *bis);
 int armada100_fec_register(unsigned long base_addr);

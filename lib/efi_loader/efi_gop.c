@@ -8,7 +8,6 @@
 #include <common.h>
 #include <dm.h>
 #include <efi_loader.h>
-#include <inttypes.h>
 #include <lcd.h>
 #include <malloc.h>
 #include <video.h>
@@ -472,7 +471,7 @@ efi_status_t efi_gop_register(void)
 	gopobj->info.version = 0;
 	gopobj->info.width = col;
 	gopobj->info.height = row;
-	gopobj->info.pixel_format = EFI_GOT_RGBA8;
+	gopobj->info.pixel_format = EFI_GOT_BGRA8;
 	gopobj->info.pixels_per_scanline = col;
 
 	gopobj->bpix = bpix;

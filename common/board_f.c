@@ -11,8 +11,8 @@
 
 #include <common.h>
 #include <console.h>
-#include <environment.h>
 #include <dm.h>
+#include <environment.h>
 #include <fdtdec.h>
 #include <fs.h>
 #include <i2c.h>
@@ -24,6 +24,7 @@
 #include <relocate.h>
 #include <spi.h>
 #include <status_led.h>
+#include <sysreset.h>
 #include <timer.h>
 #include <trace.h>
 #include <video.h>
@@ -139,6 +140,30 @@ static int display_text_info(void)
 
 	return 0;
 }
+
+#ifdef CONFIG_SYSRESET
+static int print_resetinfo(void)
+{
+	struct udevice *dev;
+	char status[256];
+	int ret;
+
+	ret = uclass_first_device_err(UCLASS_SYSRESET, &dev);
+	if (ret) {
+		debug("%s: No sysreset device found (error: %d)\n",
+		      __func__, ret);
+		/* Not all boards have sysreset drivers available during early
+		 * boot, so don't fail if one can't be found.
+		 */
+		return 0;
+	}
+
+	if (!sysreset_get_status(dev, status, sizeof(status)))
+		printf("%s", status);
+
+	return 0;
+}
+#endif
 
 static int announce_dram_init(void)
 {
@@ -281,9 +306,9 @@ static int setup_dest_addr(void)
 	gd->ram_size -= CONFIG_SYS_MEM_TOP_HIDE;
 #endif
 #ifdef CONFIG_SYS_SDRAM_BASE
-	gd->ram_top = CONFIG_SYS_SDRAM_BASE;
+	gd->ram_base = CONFIG_SYS_SDRAM_BASE;
 #endif
-	gd->ram_top += get_effective_memsize();
+	gd->ram_top = gd->ram_base + get_effective_memsize();
 	gd->ram_top = board_get_usable_ram_top(gd->mon_len);
 	gd->relocaddr = gd->ram_top;
 	debug("Ram top: %08lX\n", (ulong)gd->ram_top);
@@ -394,19 +419,21 @@ static int reserve_trace(void)
 
 static int reserve_uboot(void)
 {
-	/*
-	 * reserve memory for U-Boot code, data & bss
-	 * round down to next 4 kB limit
-	 */
-	gd->relocaddr -= gd->mon_len;
-	gd->relocaddr &= ~(4096 - 1);
-#if defined(CONFIG_E500) || defined(CONFIG_MIPS)
-	/* round down to next 64 kB limit so that IVPR stays aligned */
-	gd->relocaddr &= ~(65536 - 1);
-#endif
+	if (!(gd->flags & GD_FLG_SKIP_RELOC)) {
+		/*
+		 * reserve memory for U-Boot code, data & bss
+		 * round down to next 4 kB limit
+		 */
+		gd->relocaddr -= gd->mon_len;
+		gd->relocaddr &= ~(4096 - 1);
+	#if defined(CONFIG_E500) || defined(CONFIG_MIPS)
+		/* round down to next 64 kB limit so that IVPR stays aligned */
+		gd->relocaddr &= ~(65536 - 1);
+	#endif
 
-	debug("Reserving %ldk for U-Boot at: %08lx\n", gd->mon_len >> 10,
-	      gd->relocaddr);
+		debug("Reserving %ldk for U-Boot at: %08lx\n",
+		      gd->mon_len >> 10, gd->relocaddr);
+	}
 
 	gd->start_addr_sp = gd->relocaddr;
 
@@ -787,6 +814,9 @@ static const init_fnc_t init_sequence_f[] = {
 	display_text_info,	/* show debugging info if required */
 #if defined(CONFIG_PPC) || defined(CONFIG_SH) || defined(CONFIG_X86)
 	checkcpu,
+#endif
+#if defined(CONFIG_SYSRESET)
+	print_resetinfo,
 #endif
 #if defined(CONFIG_DISPLAY_CPUINFO)
 	print_cpuinfo,		/* display cpu info (and speed) */

@@ -9,6 +9,7 @@
 #include <asm/io.h>
 #include <linux/errno.h>
 #include <asm/system.h>
+#include <fm_eth.h>
 #include <asm/armv8/mmu.h>
 #include <asm/io.h>
 #include <asm/arch/fsl_serdes.h>
@@ -18,7 +19,6 @@
 #include <fsl_immap.h>
 #include <asm/arch/mp.h>
 #include <efi_loader.h>
-#include <fm_eth.h>
 #include <fsl-mc/fsl_mc.h>
 #ifdef CONFIG_FSL_ESDHC
 #include <fsl_esdhc.h>
@@ -835,7 +835,7 @@ int dram_init_banksize(void)
 	return 0;
 }
 
-#if defined(CONFIG_EFI_LOADER) && !defined(CONFIG_SPL_BUILD)
+#if CONFIG_IS_ENABLED(EFI_LOADER)
 void efi_add_known_memory(void)
 {
 	int i;

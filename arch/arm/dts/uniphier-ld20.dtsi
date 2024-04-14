@@ -58,6 +58,7 @@
 			clocks = <&sys_clk 32>;
 			enable-method = "psci";
 			operating-points-v2 = <&cluster0_opp>;
+			#cooling-cells = <2>;
 		};
 
 		cpu2: cpu@100 {
@@ -77,6 +78,7 @@
 			clocks = <&sys_clk 33>;
 			enable-method = "psci";
 			operating-points-v2 = <&cluster1_opp>;
+			#cooling-cells = <2>;
 		};
 	};
 
@@ -230,7 +232,6 @@
 			pinctrl-names = "default";
 			pinctrl-0 = <&pinctrl_uart0>;
 			clocks = <&peri_clk 0>;
-			clock-frequency = <58820000>;
 			resets = <&peri_rst 0>;
 		};
 
@@ -242,7 +243,6 @@
 			pinctrl-names = "default";
 			pinctrl-0 = <&pinctrl_uart1>;
 			clocks = <&peri_clk 1>;
-			clock-frequency = <58820000>;
 			resets = <&peri_rst 1>;
 		};
 
@@ -254,7 +254,6 @@
 			pinctrl-names = "default";
 			pinctrl-0 = <&pinctrl_uart2>;
 			clocks = <&peri_clk 2>;
-			clock-frequency = <58820000>;
 			resets = <&peri_rst 2>;
 		};
 
@@ -266,7 +265,6 @@
 			pinctrl-names = "default";
 			pinctrl-0 = <&pinctrl_uart3>;
 			clocks = <&peri_clk 3>;
-			clock-frequency = <58820000>;
 			resets = <&peri_rst 3>;
 		};
 
@@ -516,14 +514,14 @@
 			reg = <0x5a000000 0x400>;
 			interrupts = <0 78 4>;
 			pinctrl-names = "default";
-			pinctrl-0 = <&pinctrl_emmc_1v8>;
+			pinctrl-0 = <&pinctrl_emmc>;
 			clocks = <&sys_clk 4>;
 			resets = <&sys_rst 4>;
 			bus-width = <8>;
 			mmc-ddr-1_8v;
 			mmc-hs200-1_8v;
 			mmc-pwrseq = <&emmc_pwrseq>;
-			cdns,phy-input-delay-legacy = <4>;
+			cdns,phy-input-delay-legacy = <9>;
 			cdns,phy-input-delay-mmc-highspeed = <2>;
 			cdns,phy-input-delay-mmc-ddr = <3>;
 			cdns,phy-dll-delay-sdclk = <21>;
@@ -531,7 +529,7 @@
 		};
 
 		sd: sdhc@5a400000 {
-			compatible = "socionext,uniphier-sdhc";
+			compatible = "socionext,uniphier-sd-v3.1.1";
 			status = "disabled";
 			reg = <0x5a400000 0x800>;
 			interrupts = <0 76 4>;
@@ -622,10 +620,13 @@
 			interrupts = <0 66 4>;
 			pinctrl-names = "default";
 			pinctrl-0 = <&pinctrl_ether_rgmii>;
+			clock-names = "ether";
 			clocks = <&sys_clk 6>;
+			reset-names = "ether";
 			resets = <&sys_rst 6>;
 			phy-mode = "rgmii";
 			local-mac-address = [00 00 00 00 00 00];
+			socionext,syscon-phy-mode = <&soc_glue 0>;
 
 			mdio: mdio {
 				#address-cells = <1>;

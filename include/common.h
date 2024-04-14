@@ -37,9 +37,6 @@ typedef volatile unsigned char	vu_char;
 #include <flash.h>
 #include <image.h>
 
-/* Bring in printf format macros if inttypes.h is included */
-#define __STDC_FORMAT_MACROS
-
 #ifdef __LP64__
 #define CONFIG_SYS_SUPPORT_64BIT_DATA
 #endif
@@ -359,6 +356,7 @@ void	serial_putc_raw(const char);
 void	serial_puts   (const char *);
 int	serial_getc   (void);
 int	serial_tstc   (void);
+int	serial_setconfig(uint config);
 
 /* $(CPU)/speed.c */
 int	get_clocks (void);
@@ -387,7 +385,6 @@ uint	dpram_alloc(uint size);
 uint	dpram_alloc_align(uint size,uint align);
 void	bootcount_store (ulong);
 ulong	bootcount_load (void);
-#define BOOTCOUNT_MAGIC		0xB001C041
 
 /* $(CPU)/.../<eth> */
 void mii_init (void);
@@ -536,10 +533,10 @@ void show_activity(int arg);
 
 /* Multicore arch functions */
 #ifdef CONFIG_MP
-int cpu_status(int nr);
-int cpu_reset(int nr);
-int cpu_disable(int nr);
-int cpu_release(int nr, int argc, char * const argv[]);
+int cpu_status(u32 nr);
+int cpu_reset(u32 nr);
+int cpu_disable(u32 nr);
+int cpu_release(u32 nr, int argc, char * const argv[]);
 #endif
 
 #else	/* __ASSEMBLY__ */

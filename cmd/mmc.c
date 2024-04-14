@@ -128,7 +128,7 @@ static int do_mmcinfo(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 	return CMD_RET_SUCCESS;
 }
 
-#ifdef CONFIG_SUPPORT_EMMC_RPMB
+#if CONFIG_IS_ENABLED(CMD_MMC_RPMB)
 static int confirm_key_prog(void)
 {
 	puts("Warning: Programming authentication key can be done only once !\n"
@@ -308,8 +308,7 @@ static int do_mmc_read(cmd_tbl_t *cmdtp, int flag,
 	return (n == cnt) ? CMD_RET_SUCCESS : CMD_RET_FAILURE;
 }
 
-#if CONFIG_IS_ENABLED(MMC_WRITE)
-#if defined(CONFIG_FASTBOOT_FLASH)
+#if CONFIG_IS_ENABLED(CMD_MMC_SWRITE)
 static lbaint_t mmc_sparse_write(struct sparse_storage *info, lbaint_t blk,
 				 lbaint_t blkcnt, const void *buffer)
 {
@@ -367,13 +366,14 @@ static int do_mmc_sparse_write(cmd_tbl_t *cmdtp, int flag,
 	sparse.mssg = NULL;
 	sprintf(dest, "0x" LBAF, sparse.start * sparse.blksz);
 
-	if (write_sparse_image(&sparse, dest, addr))
+	if (write_sparse_image(&sparse, dest, addr, NULL))
 		return CMD_RET_FAILURE;
 	else
 		return CMD_RET_SUCCESS;
 }
 #endif
 
+#if CONFIG_IS_ENABLED(MMC_WRITE)
 static int do_mmc_write(cmd_tbl_t *cmdtp, int flag,
 			int argc, char * const argv[])
 {
@@ -868,10 +868,10 @@ static cmd_tbl_t cmd_mmc[] = {
 	U_BOOT_CMD_MKENT(read, 4, 1, do_mmc_read, "", ""),
 #if CONFIG_IS_ENABLED(MMC_WRITE)
 	U_BOOT_CMD_MKENT(write, 4, 0, do_mmc_write, "", ""),
-#if defined(CONFIG_FASTBOOT_FLASH)
-	U_BOOT_CMD_MKENT(swrite, 3, 0, do_mmc_sparse_write, "", ""),
-#endif
 	U_BOOT_CMD_MKENT(erase, 3, 0, do_mmc_erase, "", ""),
+#endif
+#if CONFIG_IS_ENABLED(CMD_MMC_SWRITE)
+	U_BOOT_CMD_MKENT(swrite, 3, 0, do_mmc_sparse_write, "", ""),
 #endif
 	U_BOOT_CMD_MKENT(rescan, 1, 1, do_mmc_rescan, "", ""),
 	U_BOOT_CMD_MKENT(part, 1, 1, do_mmc_part, "", ""),
@@ -886,7 +886,7 @@ static cmd_tbl_t cmd_mmc[] = {
 	U_BOOT_CMD_MKENT(partconf, 5, 0, do_mmc_partconf, "", ""),
 	U_BOOT_CMD_MKENT(rst-function, 3, 0, do_mmc_rst_func, "", ""),
 #endif
-#ifdef CONFIG_SUPPORT_EMMC_RPMB
+#if CONFIG_IS_ENABLED(CMD_MMC_RPMB)
 	U_BOOT_CMD_MKENT(rpmb, CONFIG_SYS_MAXARGS, 1, do_mmcrpmb, "", ""),
 #endif
 	U_BOOT_CMD_MKENT(setdsr, 2, 0, do_mmc_setdsr, "", ""),
@@ -927,7 +927,7 @@ U_BOOT_CMD(
 	"info - display info of the current MMC device\n"
 	"mmc read addr blk# cnt\n"
 	"mmc write addr blk# cnt\n"
-#if defined(CONFIG_FASTBOOT_FLASH)
+#if CONFIG_IS_ENABLED(CMD_MMC_SWRITE)
 	"mmc swrite addr blk#\n"
 #endif
 	"mmc erase blk# cnt\n"
@@ -935,6 +935,7 @@ U_BOOT_CMD(
 	"mmc part - lists available partition on current mmc device\n"
 	"mmc dev [dev] [part] - show or set current mmc device [partition]\n"
 	"mmc list - lists available devices\n"
+#if CONFIG_IS_ENABLED(MMC_HW_PARTITIONING)
 	"mmc hwpartition [args...] - does hardware partitioning\n"
 	"  arguments (sizes in 512-byte blocks):\n"
 	"    [user [enh start cnt] [wrrel {on|off}]] - sets user data area attributes\n"
@@ -942,6 +943,7 @@ U_BOOT_CMD(
 	"    [check|set|complete] - mode, complete set partitioning completed\n"
 	"  WARNING: Partitioning is a write-once setting once it is set to complete.\n"
 	"  Power cycling is required to initialize partitions after set to complete.\n"
+#endif
 #ifdef CONFIG_SUPPORT_EMMC_BOOT
 	"mmc bootbus dev boot_bus_width reset_boot_bus_width boot_mode\n"
 	" - Set the BOOT_BUS_WIDTH field of the specified device\n"
@@ -953,7 +955,7 @@ U_BOOT_CMD(
 	" - Change the RST_n_FUNCTION field of the specified device\n"
 	"   WARNING: This is a write-once field and 0 / 1 / 2 are the only valid values.\n"
 #endif
-#ifdef CONFIG_SUPPORT_EMMC_RPMB
+#if CONFIG_IS_ENABLED(CMD_MMC_RPMB)
 	"mmc rpmb read addr blk# cnt [address of auth-key] - block size is 256 bytes\n"
 	"mmc rpmb write addr blk# cnt <address of auth-key> - block size is 256 bytes\n"
 	"mmc rpmb key <address of auth-key> - program the RPMB authentication key.\n"

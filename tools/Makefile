@@ -93,6 +93,7 @@ dumpimage-mkimage-objs := aisimage.o \
 			common/image.o \
 			imagetool.o \
 			imximage.o \
+			imx8image.o \
 			kwbimage.o \
 			lib/md5.o \
 			lpc32xximage.o \
@@ -133,6 +134,7 @@ ifdef CONFIG_FIT_SIGNATURE
 # This affects include/image.h, but including the board config file
 # is tricky, so manually define this options here.
 HOST_EXTRACFLAGS	+= -DCONFIG_FIT_SIGNATURE
+HOST_EXTRACFLAGS	+= -DCONFIG_FIT_SIGNATURE_MAX_SIZE=$(CONFIG_FIT_SIGNATURE_MAX_SIZE)
 endif
 
 ifdef CONFIG_SYS_U_BOOT_OFFS

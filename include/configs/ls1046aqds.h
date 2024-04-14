@@ -23,7 +23,6 @@ unsigned long get_board_ddr_clk(void);
 #define CONFIG_DIMM_SLOTS_PER_CTLR	1
 /* Physical Memory Map */
 #define CONFIG_CHIP_SELECTS_PER_CTRL	4
-#define CONFIG_NR_DRAM_BANKS		2
 
 #define CONFIG_DDR_SPD
 #define SPD_EEPROM_ADDRESS		0x51
@@ -111,9 +110,6 @@ unsigned long get_board_ddr_clk(void);
 #define CONFIG_SYS_FLASH_BASE_PHYS_EARLY	0x00000000
 
 #ifdef CONFIG_MTD_NOR_FLASH
-#define CONFIG_FLASH_CFI_DRIVER
-#define CONFIG_SYS_FLASH_CFI
-#define CONFIG_SYS_FLASH_USE_BUFFER_WRITE
 #define CONFIG_SYS_FLASH_QUIET_TEST
 #define CONFIG_FLASH_SHOW_PROGRESS	45	/* count down from 45/5: 9..1 */
 #endif
@@ -387,7 +383,6 @@ unsigned long get_board_ddr_clk(void);
 /*
  * Miscellaneous configurable options
  */
-#define CONFIG_MISC_INIT_R
 
 #define CONFIG_SYS_MEMTEST_START	0x80000000
 #define CONFIG_SYS_MEMTEST_END		0x9fffffff

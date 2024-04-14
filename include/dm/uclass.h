@@ -44,6 +44,9 @@ struct udevice;
 /* Members of this uclass sequence themselves with aliases */
 #define DM_UC_FLAG_SEQ_ALIAS			(1 << 0)
 
+/* Same as DM_FLAG_ALLOC_PRIV_DMA */
+#define DM_UC_FLAG_ALLOC_PRIV_DMA		(1 << 5)
+
 /**
  * struct uclass_driver - Driver for the uclass
  *
@@ -58,6 +61,7 @@ struct udevice;
  * @post_probe: Called after a new device is probed
  * @pre_remove: Called before a device is removed
  * @child_post_bind: Called after a child is bound to a device in this uclass
+ * @child_pre_probe: Called before a child is probed in this uclass
  * @init: Called to set up the uclass
  * @destroy: Called to destroy the uclass
  * @priv_auto_alloc_size: If non-zero this is the size of the private data
@@ -302,7 +306,7 @@ int uclass_first_device_err(enum uclass_id id, struct udevice **devp);
 int uclass_next_device(struct udevice **devp);
 
 /**
- * uclass_first_device() - Get the first device in a uclass
+ * uclass_first_device_check() - Get the first device in a uclass
  *
  * The device returned is probed if necessary, and ready for use
  *
@@ -318,7 +322,7 @@ int uclass_next_device(struct udevice **devp);
 int uclass_first_device_check(enum uclass_id id, struct udevice **devp);
 
 /**
- * uclass_next_device() - Get the next device in a uclass
+ * uclass_next_device_check() - Get the next device in a uclass
  *
  * The device returned is probed if necessary, and ready for use
  *

@@ -12,12 +12,10 @@
 #define CONFIG_DDR_CLK_FREQ		100000000
 
 #define CONFIG_LAYERSCAPE_NS_ACCESS
-#define CONFIG_MISC_INIT_R
 
 #define CONFIG_DIMM_SLOTS_PER_CTLR	1
 /* Physical Memory Map */
 #define CONFIG_CHIP_SELECTS_PER_CTRL	4
-#define CONFIG_NR_DRAM_BANKS		2
 
 #define CONFIG_SYS_SPD_BUS_NUM		0
 
@@ -253,8 +251,6 @@
 
 #ifdef CONFIG_SYS_DPAA_FMAN
 #define CONFIG_FMAN_ENET
-#define CONFIG_PHYLIB_10G
-#define CONFIG_PHY_AQUANTIA
 
 #define RGMII_PHY1_ADDR			0x1
 #define RGMII_PHY2_ADDR			0x2
@@ -267,13 +263,6 @@
 #define FM1_10GEC1_PHY_ADDR		0x1
 
 #define CONFIG_ETHPRIME			"FM1@DTSEC3"
-#endif
-#endif
-
-/* QE */
-#ifndef SPL_NO_QE
-#if !defined(CONFIG_NAND_BOOT) && !defined(CONFIG_QSPI_BOOT)
-#define CONFIG_U_QE
 #endif
 #endif
 

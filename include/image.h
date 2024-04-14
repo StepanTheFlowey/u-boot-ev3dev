@@ -17,6 +17,7 @@
 
 #include "compiler.h"
 #include <asm/byteorder.h>
+#include <stdbool.h>
 
 /* Define this to avoid #ifdefs later on */
 struct lmb;
@@ -250,6 +251,7 @@ enum {
 	IH_TYPE_FLATDT,			/* Binary Flat Device Tree Blob	*/
 	IH_TYPE_KWBIMAGE,		/* Kirkwood Boot Image		*/
 	IH_TYPE_IMXIMAGE,		/* Freescale IMXBoot Image	*/
+	IH_TYPE_IMX8IMAGE,		/* Freescale IMX8Boot Image	*/
 	IH_TYPE_UBLIMAGE,		/* Davinci UBL Image		*/
 	IH_TYPE_OMAPIMAGE,		/* TI OMAP Config Header Image	*/
 	IH_TYPE_AISIMAGE,		/* TI Davinci AIS Image		*/
@@ -881,9 +883,11 @@ int bootz_setup(ulong image, ulong *start, ulong *end);
  * @image: Address of image
  * @start: Returns start address of image
  * @size : Returns size image
+ * @force_reloc: Ignore image->ep field, always place image to RAM start
  * @return 0 if OK, 1 if the image was not recognised
  */
-int booti_setup(ulong image, ulong *relocated_addr, ulong *size);
+int booti_setup(ulong image, ulong *relocated_addr, ulong *size,
+		bool force_reloc);
 
 /*******************************************************************/
 /* New uImage format specific code (prefixed with fit_) */
@@ -922,6 +926,7 @@ int booti_setup(ulong image, ulong *relocated_addr, ulong *size);
 #define FIT_SETUP_PROP		"setup"
 #define FIT_FPGA_PROP		"fpga"
 #define FIT_FIRMWARE_PROP	"firmware"
+#define FIT_STANDALONE_PROP	"standalone"
 
 #define FIT_MAX_HASH_LEN	HASH_MAX_DIGEST_SIZE
 
@@ -987,6 +992,8 @@ int fit_image_get_data_offset(const void *fit, int noffset, int *data_offset);
 int fit_image_get_data_position(const void *fit, int noffset,
 				int *data_position);
 int fit_image_get_data_size(const void *fit, int noffset, int *data_size);
+int fit_image_get_data_and_size(const void *fit, int noffset,
+				const void **data, size_t *size);
 
 int fit_image_hash_get_algo(const void *fit, int noffset, char **algo);
 int fit_image_hash_get_value(const void *fit, int noffset, uint8_t **value,
@@ -1003,6 +1010,7 @@ int fit_set_timestamp(void *fit, int noffset, time_t timestamp);
  * @comment:	Comment to add to signature nodes
  * @require_keys: Mark all keys as 'required'
  * @engine_id:	Engine to use for signing
+ * @cmdname:	Command name used when reporting errors
  *
  * Adds hash values for all component images in the FIT blob.
  * Hashes are calculated for all component images which have hash subnodes
@@ -1016,7 +1024,7 @@ int fit_set_timestamp(void *fit, int noffset, time_t timestamp);
  */
 int fit_add_verification_data(const char *keydir, void *keydest, void *fit,
 			      const char *comment, int require_keys,
-			      const char *engine_id);
+			      const char *engine_id, const char *cmdname);
 
 int fit_image_verify_with_data(const void *fit, int image_noffset,
 			       const void *data, size_t size);
@@ -1045,8 +1053,6 @@ int fit_conf_get_node(const void *fit, const char *conf_uname);
  */
 int fit_conf_get_prop_node(const void *fit, int noffset,
 		const char *prop_name);
-
-void fit_conf_print(const void *fit, int noffset, const char *p);
 
 int fit_check_ramdisk(const void *fit, int os_noffset,
 		uint8_t arch, int verify);

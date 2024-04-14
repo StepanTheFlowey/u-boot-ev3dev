@@ -6,6 +6,7 @@
 
 #include <common.h>
 #include <errno.h>
+#include <fpga.h>
 #include <image.h>
 #include <linux/libfdt.h>
 #include <spl.h>
@@ -173,20 +174,20 @@ static int spl_load_fit_image(struct spl_load_info *info, ulong sector,
 	uint8_t image_comp = -1, type = -1;
 	const void *data;
 	bool external_data = false;
-#ifdef CONFIG_SPL_FIT_SIGNATURE
-	int ret;
-#endif
+
+	if (IS_ENABLED(CONFIG_SPL_FPGA_SUPPORT) ||
+	    (IS_ENABLED(CONFIG_SPL_OS_BOOT) && IS_ENABLED(CONFIG_SPL_GZIP))) {
+		if (fit_image_get_type(fit, node, &type))
+			puts("Cannot get image type.\n");
+		else
+			debug("%s ", genimg_get_type_name(type));
+	}
 
 	if (IS_ENABLED(CONFIG_SPL_OS_BOOT) && IS_ENABLED(CONFIG_SPL_GZIP)) {
 		if (fit_image_get_comp(fit, node, &image_comp))
 			puts("Cannot get image compression format.\n");
 		else
 			debug("%s ", genimg_get_comp_name(image_comp));
-
-		if (fit_image_get_type(fit, node, &type))
-			puts("Cannot get image type.\n");
-		else
-			debug("%s ", genimg_get_type_name(type));
 	}
 
 	if (fit_image_get_load(fit, node, &load_addr))
@@ -229,14 +230,20 @@ static int spl_load_fit_image(struct spl_load_info *info, ulong sector,
 		src = (void *)data;
 	}
 
+#ifdef CONFIG_SPL_FIT_SIGNATURE
+	printf("## Checking hash(es) for Image %s ... ",
+	       fit_get_name(fit, node, NULL));
+	if (!fit_image_verify_with_data(fit, node,
+					 src, length))
+		return -EPERM;
+	puts("OK\n");
+#endif
+
 #ifdef CONFIG_SPL_FIT_IMAGE_POST_PROCESS
 	board_fit_image_post_process(&src, &length);
 #endif
 
-	if (IS_ENABLED(CONFIG_SPL_OS_BOOT)	&&
-	    IS_ENABLED(CONFIG_SPL_GZIP)		&&
-	    image_comp == IH_COMP_GZIP		&&
-	    type == IH_TYPE_KERNEL) {
+	if (IS_ENABLED(CONFIG_SPL_GZIP) && image_comp == IH_COMP_GZIP) {
 		size = length;
 		if (gunzip((void *)load_addr, CONFIG_SYS_BOOTM_LEN,
 			   src, &size)) {
@@ -254,16 +261,7 @@ static int spl_load_fit_image(struct spl_load_info *info, ulong sector,
 		image_info->entry_point = fdt_getprop_u32(fit, node, "entry");
 	}
 
-#ifdef CONFIG_SPL_FIT_SIGNATURE
-	printf("## Checking hash(es) for Image %s ...\n",
-	       fit_get_name(fit, node, NULL));
-	ret = fit_image_verify_with_data(fit, node,
-					 (const void *)load_addr, length);
-	printf("\n");
-	return !ret;
-#else
 	return 0;
-#endif
 }
 
 static int spl_fit_append_fdt(struct spl_image_info *spl_image,
@@ -342,7 +340,7 @@ int spl_load_simple_fit(struct spl_image_info *spl_image,
 	struct spl_image_info image_info;
 	int node = -1;
 	int images, ret;
-	int base_offset, align_len = ARCH_DMA_MINALIGN - 1;
+	int base_offset, hsize, align_len = ARCH_DMA_MINALIGN - 1;
 	int index = 0;
 
 	/*
@@ -371,8 +369,8 @@ int spl_load_simple_fit(struct spl_image_info *spl_image,
 	 * For FIT with data embedded, data is loaded as part of FIT image.
 	 * For FIT with external data, data is not loaded in this step.
 	 */
-	fit = (void *)((CONFIG_SYS_TEXT_BASE - size - info->bl_len -
-			align_len) & ~align_len);
+	hsize = (size + info->bl_len + align_len) & ~align_len;
+	fit = spl_get_load_buffer(-hsize, hsize);
 	sectors = get_aligned_image_size(info, size, 0);
 	count = info->read(info, sector, sectors, fit);
 	debug("fit read sector %lx, sectors=%d, dst=%p, count=%lu\n",
@@ -386,6 +384,33 @@ int spl_load_simple_fit(struct spl_image_info *spl_image,
 		debug("%s: Cannot find /images node: %d\n", __func__, images);
 		return -1;
 	}
+
+#ifdef CONFIG_SPL_FPGA_SUPPORT
+	node = spl_fit_get_image_node(fit, images, "fpga", 0);
+	if (node >= 0) {
+		/* Load the image and set up the spl_image structure */
+		ret = spl_load_fit_image(info, sector, fit, base_offset, node,
+					 spl_image);
+		if (ret) {
+			printf("%s: Cannot load the FPGA: %i\n", __func__, ret);
+			return ret;
+		}
+
+		debug("FPGA bitstream at: %x, size: %x\n",
+		      (u32)spl_image->load_addr, spl_image->size);
+
+		ret = fpga_load(0, (const void *)spl_image->load_addr,
+				spl_image->size, BIT_FULL);
+		if (ret) {
+			printf("%s: Cannot load the image to the FPGA\n",
+			       __func__);
+			return ret;
+		}
+
+		puts("FPGA image loaded from FIT\n");
+		node = -1;
+	}
+#endif
 
 	/*
 	 * Find the U-Boot image using the following search order:

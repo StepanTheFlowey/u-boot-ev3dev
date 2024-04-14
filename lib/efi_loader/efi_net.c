@@ -7,8 +7,6 @@
 
 #include <common.h>
 #include <efi_loader.h>
-#include <inttypes.h>
-#include <lcd.h>
 #include <malloc.h>
 
 static const efi_guid_t efi_net_guid = EFI_SIMPLE_NETWORK_GUID;
@@ -361,6 +359,7 @@ efi_status_t efi_net_register(void)
 	memcpy(netobj->net_mode.current_address.mac_addr, eth_get_ethaddr(), 6);
 	netobj->net_mode.hwaddr_size = ARP_HLEN;
 	netobj->net_mode.max_packet_size = PKTSIZE;
+	netobj->net_mode.if_type = ARP_ETHER;
 
 	netobj->pxe.mode = &netobj->pxe_mode;
 	if (dhcp_ack)
