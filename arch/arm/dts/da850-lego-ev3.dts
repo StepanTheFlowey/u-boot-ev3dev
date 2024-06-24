@@ -15,7 +15,7 @@
 
 	aliases {
 		serial1 = &serial1;
-		spi0 = &spi0;
+		i2c0 = &i2c0;
 	};
 
 	chosen {
@@ -58,20 +58,14 @@
 			bus-width = <4>;
 		};
 
-		spi0: spi@41000 {
+		i2c0: i2c@22000 {
+			compatible = "ti,davinci-i2c";
+			reg = <0x22000 0x1000>;
+			interrupts = <15>;
 			#address-cells = <1>;
 			#size-cells = <0>;
-			compatible = "ti,da830-spi";
-			reg = <0x41000 0x1000>;
-			num-cs = <6>;
-			ti,davinci-spi-intr-line = <1>;
-			interrupts = <20>;
-
-			flash@0 {
-				compatible = "micron,n25q128a13", "jedec,spi-nor", "spi-flash";
-				reg = <0>;
-				spi-max-frequency = <50000000>;
-			};
+			status = "okay";
+			clock-frequency = <400000>;
 		};
 
 		serial1: serial@10c000 {
