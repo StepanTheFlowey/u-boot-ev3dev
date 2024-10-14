@@ -108,3 +108,6 @@ __pycache__
 
 # moveconfig database
 /moveconfig.db
+
+# include config in tree
+!.config

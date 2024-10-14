@@ -29,9 +29,7 @@ CONFIG_USE_BOOTCOMMAND=y
 CONFIG_BOOTCOMMAND="if mmc rescan;then if fatload mmc 0:1 ${bootscr_addr} uEnv.txt;then env import -t ${bootscr_addr} ${filesize};if ext4load mmc 0:2 ${bootscr_addr} ${prefix}boot.scr;then source ${bootscr_addr};fi;fi;fi"
 CONFIG_LOGLEVEL=3
 # CONFIG_CONSOLE_FLUSH_SUPPORT is not set
-CONFIG_LOG=y
-CONFIG_LOG_MAX_LEVEL=3
-CONFIG_LOGF_FUNC_PAD=32
+CONFIG_SYS_CONSOLE_INFO_QUIET=y
 # CONFIG_DISPLAY_CPUINFO is not set
 # CONFIG_DISPLAY_BOARDINFO is not set
 CONFIG_BOARD_EARLY_INIT_F=y
